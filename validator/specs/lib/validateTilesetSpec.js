@@ -243,27 +243,17 @@ describe('validateTileset', function() {
 
     it('succeeds when child\'s sphere type boundingVolume is completely within it\'s parents\'s sphere type boundingVolume', function(done) {
         var parentBoundingVolume = {
-            box: [
-                0, 0, 0,
-                1, 0, 0,
-                0, 1, 0,
-                0, 0, 1
-            ]
+            sphere: [0, 0, 0, 1]
         };
         var childBoundingVolume = {
-            box: [
-                0, 0, 0,
-                0.5, 0, 0,
-                0, 0.5, 0,
-                0, 0, 0.5
-            ]
+            sphere: [0, 0, 0, 2]
         };
         var childTransform = {
             transform: [
-                0.87, 0.5, 0, 0,
-                -0.5, 0.87, 0, 0,
-                0, 0 , 1, 0,
-                0, 0, 0, 0
+                1, 0, 0, 0,
+                0, 1, 0, 0,
+                0, 0, 1, 0,
+                0, 0, 0, 1
             ]
         }
         var tileset = createContentlessSampleTileset(parentBoundingVolume, childBoundingVolume, childTransform);
@@ -288,12 +278,6 @@ function createSampleTileset(tileBoundingVolume, contentBoundingVolume) {
         },
         geometricError: 500,
         root: {
-            transform: [
-                96.86356343768793, 24.848542777253734, 0, 0,
-                -15.986465724980844, 62.317780594908875, 76.5566922962899, 0,
-                19.02322243409411, -74.15554020821229, 64.3356267137516, 0,
-                1215107.7612304366, -4736682.902037748, 4081926.095098698, 1
-            ],
             boundingVolume: tileBoundingVolume,
             geometricError: 100,
             refine: 'ADD',

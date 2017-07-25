@@ -12,7 +12,10 @@ var regionInsideRegion = utility.regionInsideRegion;
 var sphereInsideSphere = utility.sphereInsideSphere;
 var boxInsideBox = utility.boxInsideBox;
 var boxInsideSphere = utility.boxInsideSphere;
-
+var sphereInsideSphere = utility.sphereInsideSphere;
+var Matrix4 = Cesium.Matrix4;
+var Cartesian3 = Cesium.Cartesian3;
+var Matrix3 = Cesium.Matrix3;
 var defined = Cesium.defined;
 
 module.exports = validateTileset;
@@ -118,6 +121,26 @@ function validateTileHierarchy(root, tilesetDirectory) {
             }
         }
 
+        if (defined(parent)) {
+            if(!defined(content)) {
+                var tileBV = tile.boundingVolume.sphere;
+                var parentBV = parent.boundingVolume.sphere;
+                var tileTransform = Matrix4.IDENTITY;
+                if(defined(tile.transform)) {
+                    tileTransform = tile.transform;
+                }
+                var parentTransform = Matrix4.IDENTITY;
+                if(defined(parent.transform)) {
+                    parentTransform = parent.transform;
+                }
+                var type = 'SphereinSphere';
+
+                if(defined(tileBV) && defined(parentBV) && !checkBoundingVolume(tileBV, parentBV, tileTransform, parentTransform, type)) {
+                    return 'tile sphere [' + tileBV + '] is not within parent sphere [' + parentBV + ']';
+                }
+            }
+        }
+
         if (defined(tile.refine)) {
             if (tile.refine !== 'ADD' && tile.refine !== 'REPLACE') {
                 return 'Refine property in tile must have either "ADD" or "REPLACE" as its value.';
@@ -167,4 +190,38 @@ function validateTileHierarchy(root, tilesetDirectory) {
             }
             return message;
         });
+}
+
+function checkBoundingVolume(tileBV, parentBV, tileTransform, parentTransform, type) {
+    var returnBool;
+    switch(type) {
+        case "SphereinSphere":
+            var transformed_tileSphere = getTransformedSphere(tileBV, tileTransform);
+            var transformed_parentSphere = getTransformedSphere(parentBV, parentTransform);
+            returnBool = sphereInsideSphere(transformed_tileSphere, transformed_parentSphere);
+            break;
+        default: 
+            returnBool = false;
+            break;
+    }
+
+    return returnBool;
+}
+
+function getTransformedSphere(sphere, transform) {
+    var scratchScale = new Cartesian3();
+    var scratchCenter = new Cartesian3();
+
+    var center = Cartesian3.fromElements(sphere[0], sphere[1], sphere[2], scratchCenter);
+    var radius = sphere[3];
+
+    // Find the transformed center and radius
+    center = Matrix4.multiplyByPoint(transform, center, center);
+    var scale = Matrix4.getScale(transform, scratchScale);
+    var uniformScale = Cartesian3.maximumComponent(scale);
+    radius *= uniformScale;
+
+    // Return a Sphere array
+    var returnSphere = [center[0], center[1], center[2], radius];
+    return returnSphere;
 }
