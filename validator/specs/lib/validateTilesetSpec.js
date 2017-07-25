@@ -241,6 +241,38 @@ describe('validateTileset', function() {
             }), done).toResolve();
     });
 
+    it('succeeds when child\'s sphere type boundingVolume is completely within it\'s parents\'s sphere type boundingVolume', function(done) {
+        var parentBoundingVolume = {
+            box: [
+                0, 0, 0,
+                1, 0, 0,
+                0, 1, 0,
+                0, 0, 1
+            ]
+        };
+        var childBoundingVolume = {
+            box: [
+                0, 0, 0,
+                0.5, 0, 0,
+                0, 0.5, 0,
+                0, 0, 0.5
+            ]
+        };
+        var childTransform = {
+            transform: [
+                0.87, 0.5, 0, 0,
+                -0.5, 0.87, 0, 0,
+                0, 0 , 1, 0,
+                0, 0, 0, 0
+            ]
+        }
+        var tileset = createContentlessSampleTileset(parentBoundingVolume, childBoundingVolume, childTransform);
+        expect(validateTileset(tileset)
+            .then(function(message) {
+                expect(message).toBeUndefined();
+            }), done).toResolve();
+    });
+
     it('succeeds for valid tileset', function(done) {
         expect(validateTileset(sampleTileset)
             .then(function(message) {
@@ -268,6 +300,29 @@ function createSampleTileset(tileBoundingVolume, contentBoundingVolume) {
             content: {
                 boundingVolume: contentBoundingVolume
             }
+        }
+    };
+    return sampleTileset;
+}
+
+function createContentlessSampleTileset(parentBoundingVolume, childBoundingVolume, childTransform) {
+    var sampleTileset = {
+        asset: {
+            version: '1.0'
+        },
+        geometricError: 500,
+        root: {
+            boundingVolume: parentBoundingVolume,
+            geometricError: 100,
+            refine: 'ADD',
+            children: [
+                {
+                    transform: childTransform.transform, 
+                    boundingVolume: childBoundingVolume,
+                    geometricError: 50,
+                    refine: 'ADD'
+                }
+            ]
         }
     };
     return sampleTileset;
