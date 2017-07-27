@@ -422,7 +422,6 @@ describe('validateTileset', function() {
             }), done).toResolve();
     });
 
-    //----------------------------------------------------------------
     it('returns error message when child\'s box type boundingVolume is not completely within it\'s parents\'s sphere type boundingVolume [unaligned bounding volumes]', function(done) {
         var parentBoundingVolume = {
             sphere: [0, 0, 0, 1]
@@ -503,7 +502,6 @@ describe('validateTileset', function() {
                 expect(message).toBeUndefined();
             }), done).toResolve();
     });
-    //----------------------------------------------------------------
 
     it('succeeds for valid tileset', function(done) {
         expect(validateTileset(sampleTileset)
